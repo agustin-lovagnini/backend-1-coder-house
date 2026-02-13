@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "title": "Mesa",
+    "price": 500
+  },
+  {
+    "id": 2,
+    "title": "Silla Gamer",
+    "price": 1000
+  }
+]
