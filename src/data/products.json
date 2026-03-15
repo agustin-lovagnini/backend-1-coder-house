@@ -1,12 +1,27 @@
 [
   {
-    "id": 1,
-    "title": "Mesa",
-    "price": 500
+    "id": 4,
+    "title": "Monitor",
+    "price": 300
   },
   {
-    "id": 2,
-    "title": "Silla Gamer",
-    "price": 1000
+    "id": 5,
+    "title": "Prueba en vista B",
+    "price": 2000
+  },
+  {
+    "id": 7,
+    "title": "Mesa de luz",
+    "price": 350
+  },
+  {
+    "id": 8,
+    "title": "Escritorio moderno",
+    "price": 900
+  },
+  {
+    "id": 9,
+    "title": "Biblioteca modular ",
+    "price": 120000
   }
 ]
