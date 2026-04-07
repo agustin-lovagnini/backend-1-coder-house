@@ -1,6 +1,15 @@
 import express from "express"; // creo el servidor y manejar las rutas
 import { engine } from "express-handlebars"; // para usar handlebars como motor de plantillas (vistas) en el servidor
 
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log("🔥 Mongo conectado"))
+  .catch(err => console.log("❌ Error Mongo:", err));
+
 //! routers
 import viewsRouter from "./routes/views.router.js";
 import productsRouter from "./routes/products.router.js";
