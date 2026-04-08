@@ -1,0 +1,31 @@
+<h1>{{product.title}}</h1>
+
+<p>{{product.description}}</p>
+<p>Precio: ${{product.price}}</p>
+<p>Categoría: {{product.category}}</p>
+
+<button onclick="addToCart()">Agregar al carrito</button>
+
+<script>
+    const CART_ID = "69d5e00be15137755299f4e2";
+
+    function addToCart() {
+        fetch(`/api/carts/${CART_ID}/products/{{product._id}}`, {
+            method: "POST"
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Error real del servidor");
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log("OK:", data);
+            alert("Producto agregado 🛒");
+        })
+        .catch(err => {
+            console.error("ERROR:", err);
+            alert("❌ No se pudo agregar al carrito");
+        });
+    }
+</script>

@@ -1,34 +1,61 @@
-import { Router } from "express"; // importo el Router de express para crear rutas
-import fs from "fs"; // importo el módulo fs para trabajar con el sistema de archivos (leer y escribir archivos)
+import { Router } from "express";
+import Product from "../models/Product.js";
+import Cart from "../models/cart.js";
 
 const router = Router();
-const PRODUCTS_PATH = "./src/data/products.json"; // ruta al archivo de productos .JSON
 
-//! función para leer productos
-const readProducts = () => {
-    if (!fs.existsSync(PRODUCTS_PATH)) return []; // si el archivo no existe, devuelve un array vacío
-    const data = fs.readFileSync(PRODUCTS_PATH, "utf-8"); // lee el archivo de productos y lo devuelve como un array de objetos
-    return JSON.parse(data || "[]"); // si el archivo está vacío, devuelve un array vacío
-};
+// 🛍️ LISTADO
+router.get("/products", async (req, res) => {
+    try {
+        const { page = 1 } = req.query;
 
-//! VISTA HOME
-// GET /home
-router.get("/home", (req, res) => {
+        const result = await Product.paginate({}, {
+            page,
+            limit: 10
+        });
 
-    const products = readProducts(); // lee los productos del archivo JSON la funcion de antes
+        res.render("home", {
+            products: result.docs.map(p => p.toObject()),
+            page: result.page,
+            totalPages: result.totalPages,
+            hasPrevPage: result.hasPrevPage,
+            hasNextPage: result.hasNextPage,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage
+        });
 
-    // renderiza la vista home.handlebars
-    res.render("home", { products });
+    } catch (error) {
+        res.send("Error al cargar productos");
+    }
 });
 
+// 🔍 DETALLE
+router.get("/products/:pid", async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.pid);
 
-//! VISTA REALTIME PRODUCTS
-// GET /realtimeproducts
-router.get("/realtimeproducts", (req, res) => {
+        res.render("productDetail", {
+            product: product.toObject()
+        });
 
-    const products = readProducts();
+    } catch (error) {
+        res.send("Error al cargar producto");
+    }
+});
 
-    res.render("realTimeProducts", { products }); // renderiza la vista realTimeProducts.handlebars
+// 🛒 CARRITO
+router.get("/carts/:cid", async (req, res) => {
+    try {
+        const cart = await Cart.findById(req.params.cid)
+            .populate("products.product");
+
+        res.render("cart", {
+            cart: cart.toObject()
+        });
+
+    } catch (error) {
+        res.send("Error al cargar carrito");
+    }
 });
 
 export default router;

@@ -1,0 +1,26 @@
+<h1>Productos</h1>
+
+<ul>
+    {{#each products}}
+    <li>
+        <h3>{{this.title}}</h3>
+        <p>Precio: ${{this.price}}</p>
+
+        <a href="/products/{{this._id}}">Ver detalle</a>
+
+        <form action="/api/carts/69d5a92bb4b7a27723a4e9b2/products/{{this._id}}" method="POST">
+            <button type="submit">Agregar al carrito</button>
+        </form>
+    </li>
+    {{/each}}
+</ul>
+
+<div>
+    {{#if hasPrevPage}}
+    <a href="/products?page={{prevPage}}">⬅️ Anterior</a>
+    {{/if}}
+
+    {{#if hasNextPage}}
+    <a href="/products?page={{nextPage}}">Siguiente ➡️</a>
+    {{/if}}
+</div>

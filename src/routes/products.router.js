@@ -1,75 +1,134 @@
-import { Router } from "express"; // importo el Router de express para crear rutas, mini servidores
-import fs from "fs"; // trae el módulo fs de Node.js. El módulo fs (file system) proporciona una API para interactuar con el sistema de archivos.
+import { Router } from "express";
+import mongoose from "mongoose";
+import Product from "../models/Product.js";
 
-const router = Router(); // isto crea el router. Después ese router lo conectás en app.js.
+const router = Router();
 
-const PRODUCTS_PATH = "./src/data/products.json"; //  esto guardamos la dirección del archivo donde están los productos.
+// 🔥 GET productos con PAGINACIÓN + FILTROS + SORT
+router.get("/", async (req, res) => {
+  try {
+    const { page = 1, limit = 10, sort, query } = req.query;
 
-//! funciones para leer y escribir productos en el archivo JSON
-const readProducts = () => {
-    if (!fs.existsSync(PRODUCTS_PATH)) return [];
-    const data = fs.readFileSync(PRODUCTS_PATH, "utf-8");
-    return JSON.parse(data || "[]");
-};
+    let filter = {};
 
-//! funcion para guardar los productos en el archivo JSON. Recibe un array de productos y lo guarda en el archivo.
-const writeProducts = (products) => {
-    fs.writeFileSync(PRODUCTS_PATH, JSON.stringify(products, null, 2));
-};
+    // 🔍 FILTROS
+    if (query) {
+      // disponibilidad (stock)
+      if (query === "true" || query === "false") {
+        filter.stock = query === "true" ? { $gt: 0 } : 0;
+      } else {
+        // categoría
+        filter.category = query;
+      }
+    }
 
-//! Obtener todos los productos
-router.get("/", (req, res) => {
-    const products = readProducts();
-    res.json(products);
+    // ⚙️ OPCIONES
+    const options = {
+      page: Number(page),
+      limit: Number(limit),
+      sort:
+        sort === "asc"
+          ? { price: 1 }
+          : sort === "desc"
+          ? { price: -1 }
+          : {}
+    };
+
+    const result = await Product.paginate(filter, options);
+
+    // 🔗 LINKS DINÁMICOS
+    const baseUrl = "http://localhost:8080/api/products";
+
+    const buildLink = (pageNum) => {
+      let url = `${baseUrl}?page=${pageNum}&limit=${limit}`;
+
+      if (query) url += `&query=${query}`;
+      if (sort) url += `&sort=${sort}`;
+
+      return url;
+    };
+
+    res.json({
+      status: "success",
+      payload: result.docs,
+      totalPages: result.totalPages,
+      prevPage: result.prevPage,
+      nextPage: result.nextPage,
+      page: result.page,
+      hasPrevPage: result.hasPrevPage,
+      hasNextPage: result.hasNextPage,
+      prevLink: result.hasPrevPage ? buildLink(result.prevPage) : null,
+      nextLink: result.hasNextPage ? buildLink(result.nextPage) : null
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener productos" });
+  }
 });
 
-//! Obtener producto por ID
-router.get("/:id", (req, res) => {
-    const products = readProducts();
-    const id = parseInt(req.params.id);
+// 🔥 GET producto por ID
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    const product = products.find(p => p.id === id);
+    // 🧠 VALIDACIÓN ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    const product = await Product.findById(id);
 
     if (!product) {
-        return res.status(404).json({ error: "Producto no encontrado" });
+      return res.status(404).json({ error: "Producto no encontrado" });
     }
 
     res.json(product);
+
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener producto" });
+  }
 });
 
-//! Crear producto
-router.post("/", (req, res) => {
-    const products = readProducts();
+// 🔥 POST crear producto
+router.post("/", async (req, res) => {
+  try {
+    const { title, price } = req.body;
 
-    const nextId =
-        products.length > 0
-            ? products[products.length - 1].id + 1
-            : 1;
+    // ✅ VALIDACIÓN
+    if (!title || !price) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
+    }
 
-    const newProduct = {
-        id: nextId,
-        ...req.body
-    };
+    const product = await Product.create(req.body);
 
-    products.push(newProduct);
+    res.status(201).json(product);
 
-    writeProducts(products);
-
-    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ error: "Error al crear producto" });
+  }
 });
 
-//! Eliminar producto
-router.delete("/:id", (req, res) => {
+// 🔥 DELETE producto
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
-    const products = readProducts();
-    const id = parseInt(req.params.id);
+    // 🧠 VALIDACIÓN ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
 
-    const filteredProducts = products.filter(p => p.id !== id);
+    const deleted = await Product.findByIdAndDelete(id);
 
-    writeProducts(filteredProducts);
+    if (!deleted) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
 
     res.json({ message: "Producto eliminado" });
 
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar producto" });
+  }
 });
 
 export default router;
