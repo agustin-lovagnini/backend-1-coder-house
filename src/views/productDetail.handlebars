@@ -2,12 +2,12 @@
 
 <p>{{product.description}}</p>
 <p>Precio: ${{product.price}}</p>
-<p>Categoría: {{product.category}}</p>
+<p>Categoria: {{product.category}}</p>
 
 <button onclick="addToCart()">Agregar al carrito</button>
 
 <script>
-    const CART_ID = "69d5e00be15137755299f4e2";
+    const CART_ID = "{{cartId}}";
 
     function addToCart() {
         fetch(`/api/carts/${CART_ID}/products/{{product._id}}`, {
@@ -21,11 +21,11 @@
         })
         .then(data => {
             console.log("OK:", data);
-            alert("Producto agregado 🛒");
+            alert("Producto agregado al carrito");
         })
         .catch(err => {
             console.error("ERROR:", err);
-            alert("❌ No se pudo agregar al carrito");
+            alert("No se pudo agregar al carrito");
         });
     }
 </script>

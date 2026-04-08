@@ -11,12 +11,12 @@
 
 <div>
     {{#if hasPrevPage}}
-    <a href="/products?page={{prevPage}}">⬅ Anterior</a>
+    <a href="/products?page={{prevPage}}">&larr; Anterior</a>
     {{/if}}
 
-    Página {{page}} de {{totalPages}}
+    Pagina {{page}} de {{totalPages}}
 
     {{#if hasNextPage}}
-    <a href="/products?page={{nextPage}}">Siguiente ➡</a>
+    <a href="/products?page={{nextPage}}">Siguiente &rarr;</a>
     {{/if}}
 </div>

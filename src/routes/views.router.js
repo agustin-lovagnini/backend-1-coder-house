@@ -1,10 +1,11 @@
 import { Router } from "express";
-import Product from "../models/Product.js";
+import Product from "../models/product.js";
 import Cart from "../models/cart.js";
 
 const router = Router();
+const DEFAULT_CART_ID = "69d5e00be15137755299f4e2";
 
-// 🛍️ LISTADO
+// Listado
 router.get("/products", async (req, res) => {
     try {
         const { page = 1 } = req.query;
@@ -15,7 +16,7 @@ router.get("/products", async (req, res) => {
         });
 
         res.render("home", {
-            products: result.docs.map(p => p.toObject()),
+            products: result.docs.map((p) => p.toObject()),
             page: result.page,
             totalPages: result.totalPages,
             hasPrevPage: result.hasPrevPage,
@@ -29,13 +30,14 @@ router.get("/products", async (req, res) => {
     }
 });
 
-// 🔍 DETALLE
+// Detalle
 router.get("/products/:pid", async (req, res) => {
     try {
         const product = await Product.findById(req.params.pid);
 
         res.render("productDetail", {
-            product: product.toObject()
+            product: product.toObject(),
+            cartId: DEFAULT_CART_ID
         });
 
     } catch (error) {
@@ -43,7 +45,7 @@ router.get("/products/:pid", async (req, res) => {
     }
 });
 
-// 🛒 CARRITO
+// Carrito
 router.get("/carts/:cid", async (req, res) => {
     try {
         const cart = await Cart.findById(req.params.cid)
