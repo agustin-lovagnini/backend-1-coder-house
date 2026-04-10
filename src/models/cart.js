@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+//! Esquema de carrito
 const cartSchema = new mongoose.Schema({
     products: [
         {
@@ -16,6 +17,6 @@ const cartSchema = new mongoose.Schema({
     ]
 });
 
-const Cart = mongoose.models.Cart || mongoose.model("Cart", cartSchema);
+const Cart = mongoose.models.Cart || mongoose.model("Cart", cartSchema); //* Si ya existe el modelo "Cart", lo usa. Si no, lo crea con el esquema cartSchema.
 
 export default Cart;

@@ -1,5 +1,13 @@
 <h1>Productos</h1>
 
+{{#if query}}
+<p>Filtro aplicado: {{query}}</p>
+{{/if}}
+
+{{#if sort}}
+<p>Orden por precio: {{sort}}</p>
+{{/if}}
+
 <ul>
     {{#each products}}
     <li>
@@ -8,7 +16,7 @@
 
         <a href="/products/{{this._id}}">Ver detalle</a>
 
-        <form action="/api/carts/69d5a92bb4b7a27723a4e9b2/products/{{this._id}}" method="POST">
+        <form action="/api/carts/{{../cartId}}/products/{{this._id}}" method="POST">
             <button type="submit">Agregar al carrito</button>
         </form>
     </li>
@@ -17,10 +25,12 @@
 
 <div>
     {{#if hasPrevPage}}
-    <a href="/products?page={{prevPage}}">⬅️ Anterior</a>
+    <a href="/products?page={{prevPage}}{{extraQuery}}">&larr; Anterior</a>
     {{/if}}
 
+    Pagina {{page}} de {{totalPages}}
+
     {{#if hasNextPage}}
-    <a href="/products?page={{nextPage}}">Siguiente ➡️</a>
+    <a href="/products?page={{nextPage}}{{extraQuery}}">Siguiente &rarr;</a>
     {{/if}}
 </div>

@@ -1,35 +1,35 @@
-import express from "express";
-import { engine } from "express-handlebars";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+import express from "express"; //? Trae Express
+import { engine } from "express-handlebars"; //? Trae Handlebars
+import mongoose from "mongoose"; //? Trae Mongoose
+import dotenv from "dotenv"; //? Trae dotenv para leer variables de entorno (.env)
 
 import viewsRouter from "./routes/views.router.js";
 import productsRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.router.js";
 
-dotenv.config();
+dotenv.config(); //* Cargao variables de .env
 
-const app = express();
+const app = express(); //* Instancia de Express
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); //* Middleware para parsear JSON
+app.use(express.urlencoded({ extended: true })); //* Middleware para parsear formularios
 
-// 🔥 Mongo
+//! Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("🔥 Mongo conectado"))
   .catch(err => console.log("❌ Error Mongo:", err));
 
-// 🔥 Handlebars
-app.engine("handlebars", engine());
-app.set("view engine", "handlebars");
-app.set("views", "./src/views");
+//! Configuración de Handlebars
+app.engine("handlebars", engine()); // * Motor de plantillas
+app.set("view engine", "handlebars"); // Express renderiza con Handlebars
+app.set("views", "./src/views"); //* Donde esta guardada las vistas
 
-// 🔥 Rutas
-app.use("/api/products", productsRouter);
-app.use("/api/carts", cartsRouter);
-app.use("/", viewsRouter);
+//! Rutas
+app.use("/api/products", productsRouter); //* Como empiezan las rutas
+app.use("/api/carts", cartsRouter); //* Las rutas de carts empiezan con /api/carts
+app.use("/", viewsRouter); //* Rutas para vistas empiezan con / (raíz)
 
-// 🔥 Server
+//! Server
 app.listen(8080, () => {
   console.log("Servidor corriendo en puerto 8080");
 });

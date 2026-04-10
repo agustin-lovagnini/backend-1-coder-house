@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import mongoosePaginate from "mongoose-paginate-v2";
+import mongoosePaginate from "mongoose-paginate-v2"; //
 
+//! Esquema de producto
 const productSchema = new mongoose.Schema({
     title: String,
     description: String,
@@ -11,8 +12,8 @@ const productSchema = new mongoose.Schema({
     code: String
 });
 
-productSchema.plugin(mongoosePaginate);
+productSchema.plugin(mongoosePaginate); 
 
-const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
+const Product = mongoose.models.Product || mongoose.model("Product", productSchema);//* Si ya existe el modelo "Product", lo usa. Si no, lo crea con el esquema productSchema.
 
 export default Product;
