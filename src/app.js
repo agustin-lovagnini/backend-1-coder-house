@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true })); //* Middleware para parsear for
 
 //! Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("🔥 Mongo conectado"))
+  .then(() => console.log("✔️✔️ Mongo conectado"))
   .catch(err => console.log("❌ Error Mongo:", err));
 
 //! Configuración de Handlebars
@@ -31,5 +31,5 @@ app.use("/", viewsRouter); //* Rutas para vistas empiezan con / (raíz)
 
 //! Server
 app.listen(8080, () => {
-  console.log("Servidor corriendo en puerto 8080");
+  console.log("✔️Servidor corriendo en puerto 8080");
 });

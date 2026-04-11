@@ -16,7 +16,7 @@
 
         <a href="/products/{{this._id}}">Ver detalle</a>
 
-        <form action="/api/carts/{{../cartId}}/products/{{this._id}}" method="POST">
+        <form onsubmit="addToCart(event, '{{../cartId}}', '{{this._id}}')">
             <button type="submit">Agregar al carrito</button>
         </form>
     </li>
@@ -34,3 +34,26 @@
     <a href="/products?page={{nextPage}}{{extraQuery}}">Siguiente &rarr;</a>
     {{/if}}
 </div>
+
+<script>
+    function addToCart(event, cartId, productId) {
+        event.preventDefault(); // Evita que el formulario se envíe normalmente
+
+        fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: "POST"
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("No se pudo agregar el producto");
+            }
+            return res.json();
+        })
+        .then(() => {
+            window.location.href = `/carts/${cartId}`;
+        })
+        .catch(err => {
+            console.error(err);
+            alert("No se pudo agregar al carrito");
+        });
+    }
+</script>

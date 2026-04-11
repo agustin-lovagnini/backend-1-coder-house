@@ -4,25 +4,23 @@ import Product from "../models/product.js";
 
 const router = Router();
 
-// 🔥 GET productos con PAGINACIÓN + FILTROS + SORT
+//! Listado de productos con paginación, ordenamiento y filtrado
 router.get("/", async (req, res) => {
   try {
     const { page = 1, limit = 10, sort, query } = req.query;
 
-    let filter = {};
+    let filter = {}; //* Filtro vacío por defecto, se va a ir armando según query
 
-    // 🔍 FILTROS
+    //* decidimos que filtrar?
     if (query) {
-      // disponibilidad (stock)
       if (query === "true" || query === "false") {
         filter.stock = query === "true" ? { $gt: 0 } : 0;
       } else {
-        // categoría
         filter.category = query;
       }
     }
 
-    // ⚙️ OPCIONES
+    //! Opciones para paginación, ordenamiento
     const options = {
       page: Number(page),
       limit: Number(limit),
@@ -30,15 +28,16 @@ router.get("/", async (req, res) => {
         sort === "asc"
           ? { price: 1 }
           : sort === "desc"
-          ? { price: -1 }
-          : {}
+            ? { price: -1 }
+            : {}
     };
 
-    const result = await Product.paginate(filter, options);
+    const result = await Product.paginate(filter, options); //* Uso paginate para obtener productos con paginación, ordenamiento y filtrado
 
-    // 🔗 LINKS DINÁMICOS
+    //! URL base para construir los links de paginación
     const baseUrl = "http://localhost:8080/api/products";
 
+    //! devolvo en la respuesta URLs listas para ir a la página anterior o siguiente sin perder filtros
     const buildLink = (pageNum) => {
       let url = `${baseUrl}?page=${pageNum}&limit=${limit}`;
 
@@ -48,6 +47,7 @@ router.get("/", async (req, res) => {
       return url;
     };
 
+    //! Respuesta con productos y datos de paginación
     res.json({
       status: "success",
       payload: result.docs,
@@ -66,14 +66,14 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 🔥 GET producto por ID
+//! Función para obtener el carrito o crear uno nuevo si no existe por ID
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 🧠 VALIDACIÓN ID
+    //? validacion ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "ID inválido" });
+      return res.status(400).json({ error: "ID inválido" }); //! No consulto con ID aml formado
     }
 
     const product = await Product.findById(id);
@@ -89,12 +89,12 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 🔥 POST crear producto
+//! Crear nuevo producto
 router.post("/", async (req, res) => {
   try {
     const { title, price } = req.body;
 
-    // ✅ VALIDACIÓN
+    //? Validación de campos obligatorios
     if (!title || !price) {
       return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
@@ -108,17 +108,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 🔥 DELETE producto
+//! Actualizar producto por ID
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 🧠 VALIDACIÓN ID
+    //? Validación de ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "ID inválido" });
     }
 
-    const deleted = await Product.findByIdAndDelete(id);
+    const deleted = await Product.findByIdAndDelete(id); //* Elimina el producto por ID, devuelve el producto eliminado o null si no se encontró
 
     if (!deleted) {
       return res.status(404).json({ error: "Producto no encontrado" });

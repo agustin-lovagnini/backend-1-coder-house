@@ -4,21 +4,21 @@ import Product from "../models/product.js";
 
 const router = Router();
 
-// 🛒 Crear carrito
+//! Crear nuevo carrito
 router.post("/", async (req, res) => {
   try {
-    const cart = await Cart.create({ products: [] });
+    const cart = await Cart.create({ products: [] }); //* Creo un carrito nuevo con un array vacío de productos
     res.status(201).json(cart);
   } catch (error) {
     res.status(500).json({ error: "Error al crear carrito" });
   }
 });
 
-// 🛒 Obtener carrito con populate
+//! Obtener carrito por ID con productos poblados
 router.get("/:cid", async (req, res) => {
   try {
     const cart = await Cart.findById(req.params.cid)
-      .populate("products.product");
+      .populate("products.product"); //* Populo campo "product" dentro de cada producto del carrito para tener acceso a los detalles prdto.
 
     if (!cart) {
       return res.status(404).json({ error: "Carrito no encontrado" });
@@ -30,25 +30,27 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
-// 🛒 Agregar producto al carrito
+//! Agregar producto al carrito o incrementar cantidad si ya existe
 router.post("/:cid/products/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
 
-    const cart = await Cart.findById(cid);
+    const cart = await Cart.findById(cid); //* Busco el carrito por ID
     if (!cart) {
       return res.status(404).json({ error: "Carrito no encontrado" });
     }
 
-    const product = await Product.findById(pid);
+    const product = await Product.findById(pid); //* Busco el producto por ID para validar que existe antes de agregarlo al carrito
     if (!product) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
-
+    
+    //? comparo producto con :pid para ver si ya existe dentro del carrito
     const productIndex = cart.products.findIndex(
       p => p.product.toString() === pid
     );
 
+    //? si el producto existe aumento cantidad, sino lo agrego al carrito con cantidad 1
     if (productIndex !== -1) {
       cart.products[productIndex].quantity += 1;
     } else {
@@ -71,16 +73,16 @@ router.post("/:cid/products/:pid", async (req, res) => {
   }
 });
 
-// 🧹 Vaciar carrito
+//! Vaciar carrito
 router.delete("/:cid", async (req, res) => {
   try {
-    const cart = await Cart.findById(req.params.cid);
+    const cart = await Cart.findById(req.params.cid); //* Busco el carrito por ID para validar que existe antes de vaciarlo
 
     if (!cart) {
       return res.status(404).json({ error: "Carrito no encontrado" });
     }
 
-    cart.products = [];
+    cart.products = []; //* Vacío el array de productos del carrito
     await cart.save();
 
     res.json({ message: "Carrito vaciado" });
@@ -89,10 +91,10 @@ router.delete("/:cid", async (req, res) => {
   }
 });
 
-// ❌ Eliminar producto del carrito
+//! Eliminar un producto específico del carrito
 router.delete("/:cid/products/:pid", async (req, res) => {
   try {
-    const { cid, pid } = req.params;
+    const { cid, pid } = req.params; 
 
     const cart = await Cart.findById(cid);
 
@@ -100,6 +102,7 @@ router.delete("/:cid/products/:pid", async (req, res) => {
       return res.status(404).json({ error: "Carrito no encontrado" });
     }
 
+    //? Verifico si el producto existe en el carrito
     cart.products = cart.products.filter(
       p => p.product.toString() !== pid
     );
@@ -116,13 +119,14 @@ router.delete("/:cid/products/:pid", async (req, res) => {
   }
 });
 
-// 🔄 Reemplazar carrito completo
+//! Reemplazar productos del carrito por un nuevo array de productos
 router.put("/:cid", async (req, res) => {
   try {
+    //? Validación de que el carrito existe antes de actualizarlo
     const cart = await Cart.findByIdAndUpdate(
       req.params.cid,
       { products: req.body.products },
-      { new: true }
+      { new: true } //* Devuelve el carrito actualizado después de modificarlo
     );
 
     if (!cart) {
@@ -135,7 +139,7 @@ router.put("/:cid", async (req, res) => {
   }
 });
 
-// 🔢 Actualizar cantidad de un producto
+//! Actualizar cantidad de un producto específico dentro del carrito
 router.put("/:cid/products/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
@@ -147,6 +151,7 @@ router.put("/:cid/products/:pid", async (req, res) => {
       return res.status(404).json({ error: "Carrito no encontrado" });
     }
 
+    //? Verifico si el producto existe en el carrito
     const productInCart = cart.products.find(
       p => p.product.toString() === pid
     );
@@ -155,7 +160,7 @@ router.put("/:cid/products/:pid", async (req, res) => {
       return res.status(404).json({ error: "Producto no está en el carrito" });
     }
 
-    productInCart.quantity = quantity;
+    productInCart.quantity = quantity; //* Actualizo la cantidad del producto en el carrito
 
     await cart.save();
 
